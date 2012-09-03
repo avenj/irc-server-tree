@@ -12,11 +12,19 @@ use IRC::Server::Tree;
 
 sub new {
   my $class = shift;
+
+  my $tree = do {
+    return $_[0]
+      if blessed $_[0] and $_[0]->isa('IRC::Server::Tree');
+
+    return IRC::Server::Tree->new($_[0])
+      if ref $_[0] eq 'ARRAY';
+
+    IRC::Server::Tree->new
+  };
+
   my $self = {
-    tree => (
-      blessed($_[0]) && $_[0]->isa('IRC::Server::Tree') ?
-          $_[0] : IRC::Server::Tree->new
-    ),
+    tree => $tree,
   };
 
   bless $self, $class;

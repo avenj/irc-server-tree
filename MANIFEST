@@ -1,3 +1,4 @@
+bin/irc-tree-repl
 Build.PL
 lib/IRC/Server/Tree.pm
 lib/IRC/Server/Tree/Network.pm
