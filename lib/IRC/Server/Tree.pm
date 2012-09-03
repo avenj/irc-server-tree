@@ -2,8 +2,6 @@ package IRC::Server::Tree;
 our $VERSION = '0.01';
 
 ## Array-type object representing a network map.
-## Uses breadth-first recursion to find a path to a node.
-## Uses depth-first recursion to build hashes or printable maps.
 
 use strictures 1;
 use Carp;
@@ -536,7 +534,7 @@ Given a network:
       leafC
       leafD
 
-C<<trace_indexes(B<'leafD'>)>> would return:
+C<< trace_indexes(B<'leafD'>) >> would return:
 
   [ 1, 5, 1 ]
 
