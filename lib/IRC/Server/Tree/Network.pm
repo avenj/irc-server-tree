@@ -83,7 +83,8 @@ sub add_peer_to_self {
     return
   }
 
-  $self->tree->add_node_to_top($peer, $arrayref);
+  return unless
+    $self->tree->add_node_to_top($peer, $arrayref);
   $self->{seen}->{$peer} = 1;
   $self->reset_tree if $arrayref;
   1
@@ -103,7 +104,8 @@ sub add_peer_to_name {
     return
   }
 
-  $self->tree->add_node_to_name($parent_name, $new_name, $arrayref);
+  return unless
+    $self->tree->add_node_to_name($parent_name, $new_name, $arrayref);
   $self->{seen}->{$new_name} = 1;
   $self->reset_tree if $arrayref;
   1
