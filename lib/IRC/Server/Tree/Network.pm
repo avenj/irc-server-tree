@@ -14,29 +14,36 @@ sub new {
   my $class = shift;
   my $self = {
     tree => (
-        ref $_[0] && $_[0]->isa('IRC::Server::Tree') ?
+      blessed($_[0]) && $_[0]->isa('IRC::Server::Tree') ?
           $_[0] : IRC::Server::Tree->new
-      ),
-
-    ## Track unique names and routes in ->{seen}
-    seen   => {},
+    ),
   };
 
   bless $self, $class;
 
-  my $all_names = $self->tree->names_beneath( $self->tree );
-  for my $name (@$all_names) {
-    if (++$self->{seen}->{$name} > 1) {
-      croak "Passed a broken Tree; duplicate node entries for $name"
-    }
-  }
+  ## Set up ->{seen}
+  $self->reset_tree;
 
   $self
 }
 
-sub tree {
+sub reset_tree {
   my ($self) = @_;
-  $self->{tree}
+
+  ## Call me for a route clear / seen-item refresh
+  ## (ie, after mucking around in the ->tree() )
+
+  $self->{seen} = {};
+
+  my $all_names = $self->tree->names_beneath( $self->tree );
+
+  for my $name (@$all_names) {
+    if (++$self->{seen}->{$name} > 1) {
+      confess "Passed a broken Tree; duplicate node entries for $name"
+    }
+  }
+
+  1
 }
 
 sub have_peer {
@@ -90,6 +97,16 @@ sub add_peer_to_name {
   $self->{seen}->{$new_name} = 1;
 }
 
+sub hop_count {
+  ## Returns a hop count as normally used in LINKS output and similar
+  my ($self, $peer_name) = @_;
+
+  my $path = $self->trace( $peer_name );
+  return unless $path;
+
+  scalar(@$path)
+}
+
 sub split_peer {
   ## Split a peer and return the names of all hops under it.
   my ($self, $peer) = @_;
@@ -101,16 +118,6 @@ sub split_peer {
   my $names = $self->tree->names_beneath( $splitref );
 
   wantarray ? @$names : $names
-}
-
-sub hop_count {
-  ## Returns a hop count as normally used in LINKS output and similar
-  my ($self, $peer_name) = @_;
-
-  my $path = $self->trace( $peer_name );
-  return unless $path;
-
-  scalar(@$path)
 }
 
 sub trace {
@@ -129,6 +136,10 @@ sub trace {
   $traced
 }
 
+sub tree {
+  my ($self) = @_;
+  $self->{tree}
+}
 
 1;
 
@@ -202,7 +213,8 @@ Returns empty list and warns if the specified parent is not found.
   }
 
 Returns a boolean value indicating whether or not the specified name is 
-unique.
+already seen in the tree. (This relies on our tracked entries, rather 
+than finding a path for each call.)
 
 =head2 hop_count
 
@@ -257,6 +269,12 @@ it, and create a new Network:
   my $new_net = IRC::Server::Tree::Network->new(
     $tree
   );
+
+... or if you must, at least call reset_tree to reset our state and 
+validate the tree:
+
+  $net->tree->del_node_by_name('SomeNode');
+  $net->reset_tree;
 
 =head1 AUTHOR
 
