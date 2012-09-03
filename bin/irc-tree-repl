@@ -54,15 +54,17 @@ GetOptions(
     my $ref = [
       hubA => [],
       hubB => [],
-      hubC => [],
     ];
 
     my $net = IRC::Server::Tree::Network->new($ref);
 
     my @servers;
 
-    push(@servers, 'server'.$_) for ('A'..'Z', 0..9 );
-    my $s = 'Z'; push(@servers, 'server'.++$s) for 1 .. 26;
+    for my $i (1 .. 2) {
+      for my $trailing ('A' .. 'Z', 1 .. 9) {
+        push(@servers, 'server'.($trailing x $i));
+      }
+    }
 
     require List::Util;
     @servers = List::Util::shuffle(@servers);
