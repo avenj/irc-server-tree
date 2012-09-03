@@ -41,14 +41,10 @@ sub new {
       last BUILD
     }
 
-    confess(
-      "No clue what we were passed",
-      "  expected list, ARRAY, or Tree",
-      "  got $opt"
-    )
   }
 
-  bless ($self||=[]), $class
+  $self = [] unless $self;
+  bless $self, $class
 }
 
 sub add_node_to_parent_ref {
@@ -120,7 +116,8 @@ sub as_hash {
 
 sub as_list {
   my ($self, $parent_ref) = @_;
-  @{ ref $parent_ref eq 'ARRAY' || $self }
+  $parent_ref ||= $self;
+  @{ $parent_ref }
 }
 
 sub child_node_for {
