@@ -233,7 +233,7 @@ Returns the same value as L<IRC::Server::Tree/trace>; see the
 documentation for L<IRC::Server::Tree> for details.
 
 This proxy method memoizes routes for future lookups. They are cleared 
-when L</split_peer is called.
+when L</split_peer> is called.
 
 =head2 tree
 

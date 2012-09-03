@@ -17,9 +17,12 @@ my $build = Module::Build->new(
     'Test::More' => 0,
   },
   requires => {
-    'perl'       => '5.10.1',
-    'Carp'       => 0,
-    'strictures' => 1,
+    'perl'         => '5.10.1',
+    'Carp'         => 0,
+    'Storable'     => 0,
+    'Scalar::Util' => 0,
+
+    'strictures'   => 1,
   },
 );
 
