@@ -227,6 +227,21 @@ sub path_by_indexes {
 sub trace_indexes {
   my ($self, $server_name, $parent_ref) = @_;
 
+  ## An example of breadth-first search.
+  ##
+  ## We explore each path in the current node, and as we find new paths,
+  ## we queue them to be explored after the current iteration.
+  ## (This is in contrast to depth-first techniques, where you recursively
+  ## explore each deeper reference as you hit it, with the path-so-far
+  ## included in the call, until you have the path desired.)
+  ##
+  ## This is useful for cases like an IRC server tree, where there is
+  ## an essentially arbitrary structure to the tree; any node may have
+  ## any arbitrary number of child nodes (ad infinitum) and we have no
+  ## actual hints as to the possible path.
+  ##
+  ## (Hmm. Considering running networked maze-solver races...)
+  ##
   ## Defaults to operating on $self
   ## Return indexes into arrays describing the path
   ## Return value is the full list of indexes to get to the array
