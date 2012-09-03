@@ -303,6 +303,16 @@ directly-linked peer is 1 hop away:
 
 Returns empty list if the peer was not found.
 
+=head2 reset_tree
+
+  $net->reset_tree;
+
+Clears all currently-known routes and re-validates the tree.
+
+You shouldn't normally need to call this yourself unless you are in the 
+process of breaking things severely (such as manipulating the stored 
+L</tree>).
+
 =head2 split_peer
 
   my $split_names = $net->split_peer( $peer_name );
