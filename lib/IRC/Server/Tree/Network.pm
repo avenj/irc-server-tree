@@ -77,6 +77,8 @@ sub add_peer_to_self {
 
   $self->tree->add_node_to_top($peer, $arrayref);
   $self->{seen}->{$peer} = 1;
+  $self->reset_tree if $arrayref;
+  1
 }
 
 sub add_peer_to_name {
@@ -95,6 +97,8 @@ sub add_peer_to_name {
 
   $self->tree->add_node_to_name($parent_name, $new_name, $arrayref);
   $self->{seen}->{$new_name} = 1;
+  $self->reset_tree if $arrayref;
+  1
 }
 
 sub hop_count {
@@ -116,6 +120,10 @@ sub split_peer {
   delete $self->{seen}->{$peer};
 
   my $names = $self->tree->names_beneath( $splitref );
+
+  if ($names && @$names) {
+    delete $self->{seen}->{$_} for @$names;
+  }
 
   wantarray ? @$names : $names
 }
@@ -197,6 +205,13 @@ tree; i.e., a directly-linked peer.
 The identifier must be unique. IRC networks may not have duplicate 
 entries in the tree.
 
+You can optionally specify an existing tree of nodes to add under the new 
+node as an ARRAY:
+
+  $net->add_peer_to_self( $peer_name, $array_ref );
+
+...but it will trigger a tree-walk to reset seen peers.
+
 =head2 add_peer_to_name
 
   $net->add_peer_to_name( $parent_name, $new_peer_name );
@@ -205,6 +220,9 @@ Add a node identified by the specified C<$new_peer_name> to the specified
 C<$parent_name>.
 
 Returns empty list and warns if the specified parent is not found.
+
+Specifying an existing ARRAY of nodes works the same as 
+L</add_peer_to_self>.
 
 =head2 have_peer
 

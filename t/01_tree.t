@@ -1,4 +1,4 @@
-use Test::More tests => 22;
+use Test::More tests => 26;
 use strict; use warnings FATAL => 'all';
 
 BEGIN {
@@ -78,11 +78,28 @@ is_deeply(\@sorted, [ 'lleafA', 'lleafB' ], 'names_beneath(NAME) looks ok');
 
 my $deleted;
 ok($deleted = $t->del_node_by_name('lhubA'), 'del_node_by_name(lhubA)');
-my $names;
 
+my $names;
 ok($names = $t->names_beneath($deleted), 'names_beneath(REF)' );
 ok(@$names, 'names_beneath(REF) returned names');
 @sorted = sort @$names;
 is_deeply(\@sorted, [ 'lleafA', 'lleafB' ], 'names_beneath(REF) looks ok');
 
-## FIXME parent ref tests here?
+## Rejoin deleted nodes under different hub
+ok($t->add_node_to_name('hubB', 'newhub', $deleted),
+  'add_node_to_name with deleted parent ref'
+);
+
+is_deeply($t->trace('lleafB'),
+  [ 'hubB', 'newhub', 'lleafB' ],
+  'trace() to readded lleafB looks ok'
+);
+
+my $hub_node;
+ok($hub_node = $t->child_node_for('newhub'),
+  'child_node_for newhub'
+);
+
+is_deeply($t->trace('lleafB', $hub_node), [ 'lleafB' ],
+  'trace from newhub to lleafB looks ok'
+);

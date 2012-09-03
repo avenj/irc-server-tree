@@ -302,7 +302,7 @@ sub print_map {
 
 =head1 NAME
 
-IRC::Server::Tree - Represent an IRC network tree
+IRC::Server::Tree - Manipulate an IRC "spanning tree"
 
 =head1 SYNOPSIS
 
@@ -320,16 +320,18 @@ IRC::Server::Tree - Represent an IRC network tree
   ## ARRAY of hop names between root and peerB:
   my $hop_names = $tree->trace( 'peerB' );
 
-See the DESCRIPTION for a complete method list.
+See L<IRC::Server::Tree::Network> for a simpler and more specialized 
+interface to the tree.
 
-Also see C<eg/irc_tree.pl> in the distribution for a silly little 
-interactive network simulator of sorts.
+See the DESCRIPTION for a complete method list.
 
 =head1 DESCRIPTION
 
 This piece was split out of a pending project because it may prove 
 otherwise useful. See L<IRC::Server::Tree::Network> for higher-level 
-methods pertaining to manipulation of an IRC network specifically.
+(and simpler) methods pertaining to manipulation of an IRC network 
+specifically; it also provides a memory-for-speed tradeoff via 
+memoization of traced paths.
 
 IRC servers are linked to form a network; an IRC network is defined 
 as a 'spanning tree' per RFC1459.
@@ -352,7 +354,8 @@ No two nodes can share the same name.
 
 Currently, this module doesn't enforce the listed rules for performance 
 reasons, but things will break if you add non-uniquely-named nodes. Be 
-warned.
+warned. (L<IRC::Server::Tree::Network> does more to validate the tree, 
+for what it's worth.)
 
 The object instance is a simple ARRAY and a new Tree can be created from 
 an existing Tree:
@@ -388,12 +391,20 @@ Create a new network tree:
 
   my $tree = IRC::Server::Tree->new;
 
-Optionally create a tree from an existing array, if you know what you're 
-doing:
+Create a new network tree from an old one or part of one (see 
+L</child_node_for> and L</del_node_by_name>):
+
+  my $tree = IRC::Server::Tree->new( $old_tree );
+
+Optionally create a tree from an ARRAY, if you really know what 
+you're doing:
 
   my $tree = IRC::Server::Tree->new(
     [
       hubA => [
+        hubB => [
+          hubBleaf1 => [],
+        ],
         leaf1 => [],
         leaf2 => [],
       ],

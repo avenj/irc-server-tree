@@ -1,4 +1,4 @@
-use Test::More tests => 22;
+use Test::More tests => 23;
 use strict; use warnings FATAL => 'all';
 
 BEGIN {
@@ -92,7 +92,10 @@ cmp_ok($net->hop_count('hubB'), '==', 1,
  is_deeply(\@sorted, ['lhubA', 'lhubleafA', 'lleafA' ],
    'split_peer names look ok'
  );
+
+  ok(!$net->trace('lhubleafA'), 'route to hubleafA was cleared');
 }
 
 ## tree fuckery and reset_tree
-## FIXME
+## FIXME test exception thrown with invalid tree
+## FIXME test with cloned/partial trees
