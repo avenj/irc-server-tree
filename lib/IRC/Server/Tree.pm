@@ -1,5 +1,5 @@
 package IRC::Server::Tree;
-our $VERSION = '0.03';
+our $VERSION = '0.03_01';
 
 ## Array-type object representing a network map.
 
@@ -288,7 +288,7 @@ sub print_map {
       $name = "` $name";
     }
 
-    print( (' ' x $indent) . "$name\n" );
+    print {*STDOUT} ( (' ' x $indent) . "$name\n" );
 
     while (my ($next_name, $next_ref) = splice @nodes, 0, 2) {
       $indent += 3;
@@ -304,7 +304,7 @@ sub print_map {
     $indent = 1;
   }
 
-  return
+  return 1
 }
 
 1;
@@ -341,11 +341,14 @@ See the DESCRIPTION for a complete method list.
 This piece was split out of a pending project because it may prove 
 otherwise useful. See L<IRC::Server::Tree::Network> for higher-level 
 (and simpler) methods pertaining to manipulation of an IRC network 
-specifically; it also provides a memory-for-speed tradeoff via 
-memoization of traced paths.
+specifically; a Network instance also provides a memory-for-speed 
+tradeoff via memoization of traced paths.
 
-IRC servers are linked to form a network; an IRC network is defined 
-as a 'spanning tree' per RFC1459.
+IRC servers are linked to form a network.
+An IRC network is defined as a 'spanning tree' per RFC1459; this module 
+is an array-type object representing such a tree, with convenient path 
+resolution methods for determining route "hops" and extending or shrinking 
+the tree.
 
 An IRC network tree is essentially unordered; any node can have any 
 number of child nodes, with the only rules being that:
@@ -365,17 +368,15 @@ No two nodes can share the same name.
 
 Currently, this module doesn't enforce the listed rules for performance 
 reasons, but things will break if you add non-uniquely-named nodes. Be 
-warned. (L<IRC::Server::Tree::Network> does more to validate the tree, 
-for what it's worth.)
+warned. (L<IRC::Server::Tree::Network> does much more to validate the 
+tree.)
 
-The object instance is a simple ARRAY and a new Tree can be created from 
-an existing Tree:
+A new Tree can be created from an existing Tree:
 
   my $new_tree = IRC::Server::Tree->new( $old_tree );
 
-Each individual node is also an array.
-
-The general structure of the tree is a simple array-of-array:
+In principle, the general structure of the tree is your average deep 
+array-of-arrays:
 
   $self => [
     hubA => [
@@ -517,7 +518,7 @@ Takes either the name of a node in the tree or a reference to a node.
 Given an array of index hops as retrieved by L</trace_indexes>, retrieve 
 the name for each hop.
 
-This is mostly used internally.
+This is mostly used internally by L</trace>.
 
 =head2 print_map
 
@@ -544,7 +545,7 @@ The last hop returned is the target's name.
 Primarily intended for internal use. This is the breadth-first search 
 that other methods use to find a node. There is nothing very useful you 
 can do with this externally except count hops; it is documented here to 
-show how this tree works.
+show how path resolution works.
 
 Returns an arrayref consisting of the index of every hop taken to get to 
 the node reference belonging to the specified node name starting from 

@@ -156,7 +156,7 @@ sub split_peer {
     delete $self->{seen}->{$_} for @$names;
   }
 
-  wantarray ? @$names : $names
+  $names
 }
 
 sub trace {
@@ -235,15 +235,15 @@ and uniqueness-checking.
     IRC::Server::Tree->new( $previous_tree )
   );
 
-The constructor initializes a fresh Network.
+The constructor initializes a new Network.
 
-=head3 memoize
+B<memoize>
 
 Setting 'memoize' to a false value at construction time will disable 
 route preservation, saving some memory at the expense of more frequent 
 tree searches.
 
-=head3 tree
+B<tree>
 
 If an existing Tree is passed in, a list of unique node names in the Tree 
 is compiled and validated.
@@ -291,7 +291,7 @@ than finding a path for each call.)
 
 =head2 hop_count
 
-  my $count = $net->hop_count;
+  my $count = $net->hop_count( $peer_name );
 
 Returns the number of hops to the destination node; i.e., a 
 directly-linked peer is 1 hop away:
@@ -300,6 +300,8 @@ directly-linked peer is 1 hop away:
     leafA     - 1 hop
     hubB      - 1 hop
       leafB   - 2 hops
+
+Returns empty list if the peer was not found.
 
 =head2 split_peer
 
@@ -310,12 +312,19 @@ Splits a node from the tree.
 Returns an ARRAY containing the names of every node beneath the one that 
 was split, not including the originally specified peer.
 
+Returns empty list if the peer was not found.
+
+Returns empty arrayref if the node was split but no nodes were underneath 
+the split node.
+
 =head2 trace
 
   my $trace_names = $net->trace( $peer_name );
 
-Returns the same value as L<IRC::Server::Tree/trace>; see the 
-documentation for L<IRC::Server::Tree> for details.
+A successful trace returns the same value as L<IRC::Server::Tree/trace>; 
+see the documentation for L<IRC::Server::Tree> for details.
+
+Returns empty list if the peer was not found.
 
 This proxy method memoizes routes for future lookups. They are cleared 
 when L</split_peer> is called.
