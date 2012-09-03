@@ -1,9 +1,19 @@
-use Test::More tests => 23;
+use Test::More tests => 26;
 use strict; use warnings FATAL => 'all';
 
 BEGIN {
+  use_ok( 'IRC::Server::Tree' );
   use_ok( 'IRC::Server::Tree::Network' );
 }
+
+new_ok( 'IRC::Server::Tree::Network' => [
+  memoize => 0,
+  tree    => IRC::Server::Tree->new,
+]);
+
+new_ok( 'IRC::Server::Tree::Network' => [
+  IRC::Server::Tree->new
+]);
 
 my $net = new_ok( 'IRC::Server::Tree::Network' );
 

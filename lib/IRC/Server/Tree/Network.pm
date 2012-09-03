@@ -34,7 +34,7 @@ sub new {
       $memoize = $opts{memoize} || 1;
 
       return IRC::Server::Tree->new(
-        $opts{tree} ? $opts{tree} : ()
+        $opts{tree} ? delete $opts{tree} : ()
       )
     }
 
@@ -163,22 +163,22 @@ sub trace {
   my ($self, $peer) = @_;
 
   if (my $routed = $self->_have_route_for_peer($peer) ) {
-    return $routed
+    return $self->tree->path_by_indexes( $routed )
   }
 
-  ## FIXME
-  ##  Add method(s) to tree to index in using list of numbers
-  ##  Change route memoization to only save the indexes
-  ##  (ie, call trace_indexes, save indexes, method to get names
-  ##   recursively using specified indexes)
+  ## FIXME maybe needs a switch via the memoize new() opt.
+  ## If we memoize the indexes, we have to walk that path twice.
+  ##  (a search to get indexes, a walk to get names)
+  ## If we memoize the route, we spend more memory on hop names.
+  my $index_route = $self->tree->trace_indexes( $peer );
+  return unless ref $index_route eq 'ARRAY' and @$index_route;
 
-  my $traced = $self->tree->trace( $peer );
+  my $named_hops  = $self->tree->path_by_indexes( $index_route );
+  return unless ref $named_hops eq 'ARRAY' and @$named_hops;
 
-  return unless ref $traced eq 'ARRAY';
+  $self->{seen}->{$peer} = $index_route if $self->{memoize};
 
-  $self->{seen}->{$peer} = $traced if $self->{memoize};
-
-  $traced
+  $named_hops
 }
 
 sub tree {
@@ -221,11 +221,29 @@ and uniqueness-checking.
 =head2 new
 
   my $net = IRC::Server::Tree::Network->new;
+
+  ## With named opts:
+  my $net = IRC::Server::Tree::Network->new(
+    tree    => $my_tree,
+
+    ## Turn off route preservation:
+    memoize => 0,
+  );
+
+  ## With an existing Tree and no other opts:
   my $net = IRC::Server::Tree::Network->new(
     IRC::Server::Tree->new( $previous_tree )
   );
 
 The constructor initializes a fresh Network.
+
+=head3 memoize
+
+Setting 'memoize' to a false value at construction time will disable 
+route preservation, saving some memory at the expense of more frequent 
+tree searches.
+
+=head3 tree
 
 If an existing Tree is passed in, a list of unique node names in the Tree 
 is compiled and validated.
