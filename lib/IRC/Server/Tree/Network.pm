@@ -13,18 +13,37 @@ use IRC::Server::Tree;
 sub new {
   my $class = shift;
 
-  my $tree = do {
-    return $_[0]
-      if blessed $_[0] and $_[0]->isa('IRC::Server::Tree');
+  my $memoize;
+  my $tree = sub {
 
-    return IRC::Server::Tree->new($_[0])
-      if ref $_[0] eq 'ARRAY';
+    if (@_ == 1) {
+      my $item = $_[0];
 
-    IRC::Server::Tree->new
+      return $item
+        if blessed($item) and $item->isa('IRC::Server::Tree');
+
+      return IRC::Server::Tree->new($item)
+        if ref $item eq 'ARRAY';
+    } elsif (@_ > 1) {
+      ## Given named opts, we hope.
+      ##  memoize => Bool
+      ##  tree    => IRC::Server::Tree
+      my %opts = @_;
+      $opts{lc $_} = delete $opts{$_} for keys %opts;
+
+      $memoize = $opts{memoize} || 1;
+
+      return IRC::Server::Tree->new(
+        $opts{tree} ? $opts{tree} : ()
+      )
+    }
+
+    return IRC::Server::Tree->new
   };
 
   my $self = {
-    tree => $tree,
+    tree    => $tree->(@_),
+    memoize => $memoize,
   };
 
   bless $self, $class;
@@ -64,6 +83,8 @@ sub have_peer {
 
 sub _have_route_for_peer {
   my ($self, $peer) = @_;
+
+  return unless $self->{memoize};
 
   if (ref $self->{seen}->{$peer} eq 'ARRAY') {
     return $self->{seen}->{$peer}
@@ -145,11 +166,17 @@ sub trace {
     return $routed
   }
 
+  ## FIXME
+  ##  Add method(s) to tree to index in using list of numbers
+  ##  Change route memoization to only save the indexes
+  ##  (ie, call trace_indexes, save indexes, method to get names
+  ##   recursively using specified indexes)
+
   my $traced = $self->tree->trace( $peer );
 
   return unless ref $traced eq 'ARRAY';
 
-  $self->{seen}->{$peer} = $traced;
+  $self->{seen}->{$peer} = $traced if $self->{memoize};
 
   $traced
 }

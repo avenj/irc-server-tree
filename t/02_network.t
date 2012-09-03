@@ -99,3 +99,5 @@ cmp_ok($net->hop_count('hubB'), '==', 1,
 ## tree fuckery and reset_tree
 ## FIXME test exception thrown with invalid tree
 ## FIXME test with cloned/partial trees
+## FIXME new() variation tests
+## FIXME test for memoize => 0
