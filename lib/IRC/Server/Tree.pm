@@ -1,5 +1,5 @@
 package IRC::Server::Tree;
-our $VERSION = '0.03_01';
+our $VERSION = '0.04';
 
 ## Array-type object representing a network map.
 
@@ -170,8 +170,10 @@ sub names_beneath {
   ## all the nodes in the tree under us.
 
   my $ref;
-  if (ref $ref_or_name eq 'ARRAY') {
-    $ref = $ref_or_name
+  if      (!$ref_or_name) {
+    $ref = $self
+  } elsif (ref $ref_or_name) {
+    $ref = $ref_or_name || $self
   } else {
     $ref = $self->child_node_for($ref_or_name)
   }
@@ -202,11 +204,7 @@ sub trace {
     $self->trace_indexes($server_name, $parent_ref)
     or return;
 
-  my @names = @{
-    $self->path_by_indexes($index_route, $parent_ref)
-  };
-
-  \@names
+  $self->path_by_indexes($index_route, $parent_ref)
 }
 
 sub path_by_indexes {
@@ -214,9 +212,11 @@ sub path_by_indexes {
   ## Walk a trace_indexes array and retrieve names.
   ## Used by ->trace()
 
+  my @indexes = @$index_array;
+
   my @names;
   my $cur_ref = $parent_ref || $self;
-  while (my $idx = shift @$index_array) {
+  while (my $idx = shift @indexes) {
     push @names, $cur_ref->[ $idx - 1 ];
     $cur_ref = $cur_ref->[$idx];
   }
