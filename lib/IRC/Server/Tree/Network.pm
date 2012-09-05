@@ -13,7 +13,7 @@ use IRC::Server::Tree;
 sub new {
   my $class = shift;
 
-  my $memoize;
+  my $memoize = 1;
   my $tree = sub {
 
     if (@_ == 1) {
@@ -171,10 +171,10 @@ sub trace {
   ##  (a search to get indexes, a walk to get names)
   ## If we memoize the route, we spend more memory on hop names.
   my $index_route = $self->tree->trace_indexes( $peer );
-  return unless ref $index_route eq 'ARRAY' and @$index_route;
+  return unless ref $index_route eq 'ARRAY' and scalar @$index_route;
 
   my $named_hops  = $self->tree->path_by_indexes( $index_route );
-  return unless ref $named_hops eq 'ARRAY' and @$named_hops;
+  return unless ref $named_hops eq 'ARRAY' and scalar @$named_hops;
 
   $self->{seen}->{$peer} = $index_route if $self->{memoize};
 
