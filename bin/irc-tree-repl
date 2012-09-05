@@ -79,7 +79,7 @@ GetOptions(
         unless ref $top_lev eq 'ARRAY';
       if (@$top_lev) {
         ## Maybe go another level.
-        int(rand(2)) == 0 ?
+        (rand(3) < 2) ?
           return $add_to_rand->($top_lev, $name)
           : push(@$top_lev, $name => []);
       } else {
