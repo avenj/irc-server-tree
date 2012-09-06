@@ -266,7 +266,9 @@ sub trace_indexes {
 
     my @leaf_list = @$parent_ref;
     my $child_idx = 0;
+
     CHILD: while (my ($child_name, $child_ref) = splice @leaf_list, 0, 2) {
+
       unless ( $route{$child_name} ) {
         $route{$child_name} =
           [ @{ $route{$parent_name}||[] }, $child_idx+1 ];

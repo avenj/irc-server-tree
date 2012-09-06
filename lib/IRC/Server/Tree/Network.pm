@@ -107,6 +107,7 @@ sub add_peer_to_self {
   return unless
     $self->tree->add_node_to_top($peer, $arrayref);
   $self->{seen}->{$peer} = 1;
+  ## reset_tree() if we might've added children
   $self->reset_tree if $arrayref;
   1
 }
@@ -157,6 +158,22 @@ sub split_peer {
   }
 
   $names
+}
+
+sub split_peer_nodes {
+  my ($self, $peer) = @_;
+
+  ## FIXME tests for this
+  ## Should be able to split_peer_nodes and immediately readd to tree
+
+  my $splitref = $self->tree->del_node_by_name($peer) || return;
+  delete $self->{seen}->{$peer};
+
+  for my $name (@{ $self->tree->names_beneath($splitref) || [] }) {
+    delete $self->{seen}->{$name}
+  }
+
+  $splitref
 }
 
 sub trace {
@@ -326,6 +343,21 @@ Returns empty list if the peer was not found.
 
 Returns empty arrayref if the node was split but no nodes were underneath 
 the split node.
+
+=head2 split_peer_nodes
+
+  my $split_peer_nodes = $net->split_peer_nodes( $peer_name );
+
+Splits a node from the tree just like L</split_peer>, except returns the 
+array-of-arrays forming the tree underneath the split peer.
+
+This can be 
+fed back to Network add_peer methods such as L</add_peer_to_self> and 
+L</add_peer_to_name>:
+
+  my $split_nodes = $net->split_peer_nodes( 'hubA' );
+  $net->add_peer_to_self( 'NewHub' );
+  $net->add_peer_to_name( 'NewHub', $split_nodes );
 
 =head2 trace
 
