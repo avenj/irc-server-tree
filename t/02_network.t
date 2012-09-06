@@ -195,7 +195,3 @@ is_deeply($net->trace('leafA'),
     'trace to leafA after rejoin looks OK'
   );
 }
-## tree fuckery and reset_tree
-## FIXME new() variation tests
-## FIXME test for memoize => 0
-## FIXME test split_peer retval behavior, see POD

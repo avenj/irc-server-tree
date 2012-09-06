@@ -48,6 +48,8 @@ sub new {
 sub add_node_to_parent_ref {
   my ($self, $parent_ref, $name, $arrayref) = @_;
 
+  $arrayref = \@$arrayref if blessed $arrayref;
+
   push @$parent_ref, $name, ($arrayref||=[]);
 
   $arrayref
