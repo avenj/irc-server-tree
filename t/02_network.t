@@ -129,7 +129,8 @@ cmp_ok($net->hop_count('hubB'), '==', 1,
   if ($@ && $@ =~ /duplicate/) {
     pass("tree with dupes failed validation in new()")
   } else {
-    fail("should not have not allowed tree with dupes in new()")
+    fail("should not have not allowed tree with dupes in new()");
+    diag("$@");
   }
 
   eval {
@@ -140,7 +141,8 @@ cmp_ok($net->hop_count('hubB'), '==', 1,
   if ($@ && $@ =~ /duplicate/) {
     pass("tree with dupes failed validation in add_")
   } else {
-    fail("should not have allowed tree with dupes in add_")
+    fail("should not have allowed tree with dupes in add_");
+    diag("$@");
   }
 }
 
