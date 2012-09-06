@@ -1,5 +1,5 @@
 package IRC::Server::Tree;
-our $VERSION = '0.04_01';
+our $VERSION = '0.05';
 
 ## Array-type object representing a network map.
 
@@ -48,7 +48,7 @@ sub new {
 sub add_node_to_parent_ref {
   my ($self, $parent_ref, $name, $arrayref) = @_;
 
-  $arrayref = \@$arrayref if blessed $arrayref;
+  $arrayref = [@$arrayref] if blessed $arrayref;
 
   push @$parent_ref, $name, ($arrayref||=[]);
 
