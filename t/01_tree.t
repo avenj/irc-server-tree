@@ -1,4 +1,4 @@
-use Test::More tests => 32;
+use Test::More tests => 38;
 use strict; use warnings FATAL => 'all';
 
 BEGIN {
@@ -31,10 +31,28 @@ my $traced_hops;
 ok($traced_hops = $t->trace_indexes('lleafB'), 'trace_indexes(lleafB)' );
 ok(@$traced_hops == 3, 'trace_indexes returned 3 hops' );
 
+my $dfs_traced_hops;
+ok($dfs_traced_hops = $t->trace_indexes_dfs('lleafB'), 'trace_indexes_dfs' );
+ok(@$dfs_traced_hops == 3, 'trace_indexes_dfs returned 3 hops' );
+
+is_deeply($traced_hops, $dfs_traced_hops, "traces match" );
+
 my $traced_names;
 ok($traced_names = $t->trace('lleafB'), 'trace(lleafB)' );
 is_deeply($traced_names,
   [ 'hubA', 'lhubA', 'lleafB' ], 'trace() looks ok'
+);
+
+is_deeply( $t->trace('lleafB', $t),
+  [ 'hubA', 'lhubA', 'lleafB' ], 'trace() from parent looks ok'
+);
+
+is_deeply( $t->trace('lleafB', $t, 1),
+  [ 'hubA', 'lhubA', 'lleafB' ], 'DFS trace() looks ok'
+);
+
+is_deeply( $t->trace_dfs('lleafB'),
+  [ 'hubA', 'lhubA', 'lleafB' ], 'trace_dfs() looks ok'
 );
 
 ## as_hash

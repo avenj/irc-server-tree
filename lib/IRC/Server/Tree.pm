@@ -1,5 +1,5 @@
 package IRC::Server::Tree;
-our $VERSION = '0.05';
+our $VERSION = '0.05_01';
 
 ## Array-type object representing a network map.
 
@@ -48,7 +48,7 @@ sub new {
 sub add_node_to_parent_ref {
   my ($self, $parent_ref, $name, $arrayref) = @_;
 
-  $arrayref = [@$arrayref] if blessed $arrayref;
+  $arrayref = [ @$arrayref ] if blessed $arrayref;
 
   push @$parent_ref, $name, ($arrayref||=[]);
 
@@ -191,11 +191,11 @@ sub names_beneath {
     push(@names, @{ $self->names_beneath($node_ref) || [] });
   }
 
-  \@names
+  [ @names ]
 }
 
 sub trace {
-  my ($self, $server_name, $parent_ref) = @_;
+  my ($self, $server_name, $parent_ref, $dfs) = @_;
 
   ## A list of named hops to the target.
   ## The last hop is the target's name.
@@ -203,7 +203,21 @@ sub trace {
   $parent_ref = $self unless defined $parent_ref;
 
   my $index_route =
-    $self->trace_indexes($server_name, $parent_ref)
+    $dfs ?
+      $self->trace_indexes_dfs($server_name, $parent_ref)
+      : $self->trace_indexes($server_name, $parent_ref) ;
+
+  return unless $index_route;
+
+  $self->path_by_indexes($index_route, $parent_ref)
+}
+
+sub trace_dfs {
+  my ($self, $server_name, $parent_ref) = @_;
+
+  $parent_ref = $self unless defined $parent_ref;
+
+  my $index_route = $self->trace_indexes_dfs($server_name, $parent_ref)
     or return;
 
   $self->path_by_indexes($index_route, $parent_ref)
@@ -223,7 +237,7 @@ sub path_by_indexes {
     $cur_ref = $cur_ref->[$idx];
   }
 
-  \@names
+  [ @names ]
 }
 
 sub trace_indexes {
@@ -233,9 +247,11 @@ sub trace_indexes {
   ##
   ## We explore each path in the current node, and as we find new paths,
   ## we queue them to be explored after the current iteration.
-  ## (This is in contrast to depth-first techniques, where you recursively
+  ##
+  ## This is in contrast to depth-first techniques, where you recursively
   ## explore each deeper reference as you hit it, with the path-so-far
-  ## included in the call, until you have the path desired.)
+  ## included in the call, until you have the path desired.
+  ## See trace_indexes_dfs() for a DFS alternative.
   ##
   ## This is useful for cases like an IRC server tree, where there is
   ## an essentially arbitrary structure to the tree; any node may have
@@ -285,6 +301,33 @@ sub trace_indexes {
 
     $parent_idx += 2;
   }  ## PARENT
+
+  return
+}
+
+sub trace_indexes_dfs {
+  my ($self, $server_name, $parent_ref, $route) = @_;
+
+  ## Depth first node finder.
+  ##  For every child node found, call self with current route.
+
+  $route      = [] unless $route;
+  $parent_ref = $self unless $parent_ref;
+
+  my @list = @$parent_ref;
+
+  my $cur_idx = 1;
+  while (my ($name, $subnode) = splice @list, 0, 2) {
+    return [ @$route, $cur_idx ] if $name eq $server_name;
+
+    my $next = $self->trace_indexes_dfs(
+      $server_name, $subnode,
+      [ @$route, $cur_idx ]
+    );
+    return $next if $next;
+
+    $cur_idx += 2;
+  }
 
   return
 }
@@ -411,8 +454,8 @@ array-of-arrays:
   ],
 
 The methods provided below can be used to manipulate the tree and 
-determine hops in a path to an arbitrary node using a breadth-first 
-search.
+determine hops in a path to an arbitrary node using either breadth-first 
+or depth-first search.
 
 Currently routes are not memoized; that's left to a higher layer or 
 subclass.
@@ -551,6 +594,7 @@ Prints a visualization of the network map to STDOUT.
 
   my $names = $tree->trace( $parent_name );
   my $names = $tree->trace( $parent_name, $start_ref );
+  my $names = $tree->trace( $parent_name, $start_ref, 'dfs' );
 
 Returns an arrayref of the names of every hop in the path to the 
 specified parent name.
@@ -560,12 +604,22 @@ is also specified.
 
 The last hop returned is the target's name.
 
+Specifying a true value as a third argument is the same as calling 
+L</trace_dfs>. Defaults to breadth-first as described in 
+L</trace_indexes>.
+
+=head2 trace_dfs
+
+A convenience method for using depth-first tracing.
+
+This is the same as specifying a true third argument to L</trace>.
+
 =head2 trace_indexes
 
-Primarily intended for internal use. This is the breadth-first search 
-that other methods use to find a node. There is nothing very useful you 
-can do with this externally except count hops; it is documented here to 
-show how path resolution works.
+Primarily intended for internal use. This is the BFS/DFS search 
+that other methods use to find a node. There is nothing very 
+useful you can do with this externally except count hops; it is documented 
+here to show how path resolution works.
 
 Returns an arrayref consisting of the index of every hop taken to get to 
 the node reference belonging to the specified node name starting from 
