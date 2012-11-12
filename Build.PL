@@ -30,6 +30,12 @@ my $build = Module::Build->new(
     'Eval::WithLexicals' => 0,
     'Term::ReadLine'     => 0,
   },
+
+  meta_merge => {
+    resources => {
+      repository => 'http://github.com/avenj/irc-server-tree.git',
+    },
+  },
 );
 
 $build->create_build_script;
