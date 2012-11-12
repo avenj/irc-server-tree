@@ -256,7 +256,9 @@ sub trace_indexes {
   ## This is useful for cases like an IRC server tree, where there is
   ## an essentially arbitrary structure to the tree; any node may have
   ## any arbitrary number of child nodes (ad infinitum) and we have no
-  ## actual hints as to the possible path.
+  ## actual hints as to the possible path. Therefore we cannot predict
+  ## the most performant path-finding mechanism -- but we can optimize
+  ## towards finding paths closest to us more quickly.
   ##
   ## (Hmm. Considering running networked maze-solver races...)
   ##
@@ -272,12 +274,13 @@ sub trace_indexes {
   ## Subtracting one from an index will get you the NAME value.
 
   ## A start-point.
-  my @queue = ( PARENT => ($parent_ref || $self) );
+  my @queue = ( '' => ($parent_ref || $self) );
 
   ## Our seen routes.
   my %route;
 
   my $parent_idx = 0;
+
   PARENT: while (my ($parent_name, $parent_ref) = splice @queue, 0, 2) {
 
     return [ $parent_idx+1 ] if $parent_name eq $server_name;
