@@ -1,12 +1,11 @@
 package IRC::Server::Tree;
-our $VERSION = '0.05_01';
 
 ## Array-type object representing a network map.
 
 use strictures 1;
 use Carp;
 
-use Scalar::Util 'blessed';
+use Scalar::Util 'blessed', 'reftype';
 use Storable     'dclone' ;
 
 sub new {
@@ -32,7 +31,7 @@ sub new {
       last BUILD
     }
 
-    if (ref $opt eq 'ARRAY') {
+    if (reftype $opt eq 'ARRAY') {
       ## Got a Tree as a raw ARRAY.
       ## No clone; keep refs to allow darker forms of magic
       $self = $opt;
@@ -307,6 +306,12 @@ sub trace_indexes {
 
   return
 }
+
+=pod
+
+=for Pod::Coverage trace_indexes_dfs
+
+=cut
 
 sub trace_indexes_dfs {
   my ($self, $server_name, $parent_ref, $route) = @_;
