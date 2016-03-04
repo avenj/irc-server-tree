@@ -18,24 +18,22 @@ IRC::Server::Tree - Manipulate an IRC "spanning tree"
     ## ARRAY of hop names between root and peerB:
     my $hop_names = $tree->trace( 'peerB' );
 
-See [IRC::Server::Tree::Network](http://search.cpan.org/perldoc?IRC::Server::Tree::Network) for a simpler and more specialized 
+See [IRC::Server::Tree::Network](https://metacpan.org/pod/IRC::Server::Tree::Network) for a simpler and more specialized 
 interface to the tree.
 
 See the DESCRIPTION for a complete method list.
 
 # DESCRIPTION
 
-This piece was split out of a pending project because it may prove 
-otherwise useful. See [IRC::Server::Tree::Network](http://search.cpan.org/perldoc?IRC::Server::Tree::Network) for higher-level 
-(and simpler) methods pertaining to manipulation of an IRC network 
-specifically; a Network instance also provides an optional 
-memory-for-speed tradeoff via memoization of traced paths.
-
-IRC servers are linked to form a network.
 An IRC network is defined as a 'spanning tree' per RFC1459; this module 
 is an array-type object representing such a tree, with convenient path 
 resolution methods for determining route "hops" and extending or shrinking 
 the tree.
+
+See [IRC::Server::Tree::Network](https://metacpan.org/pod/IRC::Server::Tree::Network) for higher-level 
+(and simpler) methods pertaining to manipulation of an IRC network 
+specifically; a Network instance also provides an optional 
+memory-for-speed tradeoff via memoization of traced paths.
 
 An IRC network tree is essentially unordered; any node can have any 
 number of child nodes, with the only rules being that:
@@ -47,7 +45,7 @@ any two nodes, and no node has more than one parent)
 Currently, this module doesn't enforce the listed rules for performance 
 reasons, but things will break if you add non-uniquely-named nodes. Be 
 warned. In fact, this module doesn't sanity 
-check very much of anything; an [IRC::Server::Tree::Network](http://search.cpan.org/perldoc?IRC::Server::Tree::Network) does much 
+check very much of anything; an [IRC::Server::Tree::Network](https://metacpan.org/pod/IRC::Server::Tree::Network) does much 
 more to validate the tree and passed arguments.
 
 A new Tree can be created from an existing Tree:
@@ -83,7 +81,7 @@ Create a new network tree:
     my $tree = IRC::Server::Tree->new;
 
 Create a new network tree from an old one or part of one (see 
-["child\_node\_for"](#child\_node\_for) and ["del\_node\_by\_name"](#del\_node\_by\_name)):
+["child\_node\_for"](#child_node_for) and ["del\_node\_by\_name"](#del_node_by_name)):
 
     my $tree = IRC::Server::Tree->new( $old_tree );
 
@@ -113,14 +111,14 @@ you're doing:
 
 Adds an empty or preexisting node to a specified parent reference.
 
-Also see ["add\_node\_to\_top"](#add\_node\_to\_top), ["add\_node\_to\_name"](#add\_node\_to\_name)
+Also see ["add\_node\_to\_top"](#add_node_to_top), ["add\_node\_to\_name"](#add_node_to_name)
 
 ## add\_node\_to\_top
 
     $tree->add_node_to_top( $new_name );
     $tree->add_node_to_top( $new_name, $new_ref );
 
-Also see ["add\_node\_to\_parent\_ref"](#add\_node\_to\_parent\_ref), ["add\_node\_to\_name"](#add\_node\_to\_name)
+Also see ["add\_node\_to\_parent\_ref"](#add_node_to_parent_ref), ["add\_node\_to\_name"](#add_node_to_name)
 
 ## add\_node\_to\_name
 
@@ -150,7 +148,7 @@ For example:
 
     my $hash_ref = $tree->as_hash( $self->child_node_for('MyHub1') );
 
-Also see ["child\_node\_for"](#child\_node\_for)
+Also see ["child\_node\_for"](#child_node_for)
 
 ## as\_list
 
@@ -159,7 +157,7 @@ Also see ["child\_node\_for"](#child\_node\_for)
 
 Returns the tree in list format.
 
-Not useful for most purposes and may be removed.
+(["as\_hash"](#as_hash) is likely to be more useful.)
 
 ## child\_node\_for
 
@@ -184,7 +182,7 @@ Returns the deleted node.
     my $names = $tree->names_beneath( $parent_name );
     my $names = $tree->names_beneath( $parent_ref );
 
-Return an arrayref of all names in the tree beneath the specified parent 
+Return an ARRAY of all names in the tree beneath the specified parent 
 node.
 
 Takes either the name of a node in the tree or a reference to a node.
@@ -194,7 +192,7 @@ Takes either the name of a node in the tree or a reference to a node.
     my $names = $tree->path_by_indexes( $index_route );
     my $names = $tree->path_by_indexes( $index_route, $parent_ref );
 
-Given an array of index hops as retrieved by ["trace\_indexes"](#trace\_indexes), retrieve 
+Given an array of index hops as retrieved by ["trace\_indexes"](#trace_indexes), retrieve 
 the name for each hop.
 
 This is mostly used internally by ["trace"](#trace).
@@ -212,7 +210,7 @@ Prints a visualization of the network map to STDOUT.
     my $names = $tree->trace( $parent_name, $start_ref );
     my $names = $tree->trace( $parent_name, $start_ref, 'dfs' );
 
-Returns an arrayref of the names of every hop in the path to the 
+Returns an ARRAY of the names of every hop in the path to the 
 specified parent name.
 
 Starts tracing from the root of the tree unless a parent node reference 
@@ -221,12 +219,13 @@ is also specified.
 The last hop returned is the target's name.
 
 Specifying a true value as a third argument is the same as calling 
-["trace\_dfs"](#trace\_dfs). Defaults to breadth-first as described in 
-["trace\_indexes"](#trace\_indexes).
+["trace\_dfs"](#trace_dfs). Defaults to breadth-first as described in 
+["trace\_indexes"](#trace_indexes).
 
 ## trace\_dfs
 
-A convenience method for using depth-first tracing.
+A convenience method for using depth-first tracing. This is likely to be less
+efficient than the default breadth-first approach for most network layouts.
 
 This is the same as specifying a true third argument to ["trace"](#trace).
 
@@ -237,7 +236,7 @@ that other methods use to find a node. There is nothing very
 useful you can do with this externally except count hops; it is documented 
 here to show how path resolution works.
 
-Returns an arrayref consisting of the index of every hop taken to get to 
+Returns an ARRAY consisting of the index of every hop taken to get to 
 the node reference belonging to the specified node name starting from 
 the root of the tree or the specified parent node reference.
 
@@ -250,7 +249,7 @@ Given a network:
         leafC
         leafD
 
-`trace_indexes(__'leafD'__)` would return:
+`trace_indexes(**'leafD'**)` would return:
 
     [ 1, 5, 1 ]
 
@@ -260,4 +259,4 @@ subtracting one from each index; ["trace"](#trace) handles this.
 
 # AUTHOR
 
-Jon Portnoy <avenj@cobaltirc.org>
+Jon Portnoy &lt;avenj@cobaltirc.org>

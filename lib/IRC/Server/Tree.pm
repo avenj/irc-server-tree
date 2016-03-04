@@ -184,7 +184,7 @@ sub names_beneath {
   my @list = @$ref;
   my @names;
 
-  ## Recurse and accumulate names.
+  ## Iter and accumulate names.
   while (my ($node_name, $node_ref) = splice @list, 0, 2) {
     push(@names, $node_name);
     push(@names, @{ $self->names_beneath($node_ref) || [] });
@@ -258,8 +258,6 @@ sub trace_indexes {
   ## actual hints as to the possible path. Therefore we cannot predict
   ## the most performant path-finding mechanism -- but we can optimize
   ## towards finding paths closest to us more quickly.
-  ##
-  ## (Hmm. Considering running networked maze-solver races...)
   ##
   ## Defaults to operating on $self
   ## Return indexes into arrays describing the path
@@ -408,17 +406,15 @@ See the DESCRIPTION for a complete method list.
 
 =head1 DESCRIPTION
 
-This piece was split out of a pending project because it may prove 
-otherwise useful. See L<IRC::Server::Tree::Network> for higher-level 
-(and simpler) methods pertaining to manipulation of an IRC network 
-specifically; a Network instance also provides an optional 
-memory-for-speed tradeoff via memoization of traced paths.
-
-IRC servers are linked to form a network.
 An IRC network is defined as a 'spanning tree' per RFC1459; this module 
 is an array-type object representing such a tree, with convenient path 
 resolution methods for determining route "hops" and extending or shrinking 
 the tree.
+
+See L<IRC::Server::Tree::Network> for higher-level 
+(and simpler) methods pertaining to manipulation of an IRC network 
+specifically; a Network instance also provides an optional 
+memory-for-speed tradeoff via memoization of traced paths.
 
 An IRC network tree is essentially unordered; any node can have any 
 number of child nodes, with the only rules being that:
@@ -551,7 +547,7 @@ Also see L</child_node_for>
 
 Returns the tree in list format.
 
-Not useful for most purposes and may be removed.
+(L</as_hash> is likely to be more useful.)
 
 =head2 child_node_for
 
@@ -576,7 +572,7 @@ Returns the deleted node.
   my $names = $tree->names_beneath( $parent_name );
   my $names = $tree->names_beneath( $parent_ref );
 
-Return an arrayref of all names in the tree beneath the specified parent 
+Return an ARRAY of all names in the tree beneath the specified parent 
 node.
 
 Takes either the name of a node in the tree or a reference to a node.
@@ -604,7 +600,7 @@ Prints a visualization of the network map to STDOUT.
   my $names = $tree->trace( $parent_name, $start_ref );
   my $names = $tree->trace( $parent_name, $start_ref, 'dfs' );
 
-Returns an arrayref of the names of every hop in the path to the 
+Returns an ARRAY of the names of every hop in the path to the 
 specified parent name.
 
 Starts tracing from the root of the tree unless a parent node reference 
@@ -618,7 +614,8 @@ L</trace_indexes>.
 
 =head2 trace_dfs
 
-A convenience method for using depth-first tracing.
+A convenience method for using depth-first tracing. This is likely to be less
+efficient than the default breadth-first approach for most network layouts.
 
 This is the same as specifying a true third argument to L</trace>.
 
@@ -629,7 +626,7 @@ that other methods use to find a node. There is nothing very
 useful you can do with this externally except count hops; it is documented 
 here to show how path resolution works.
 
-Returns an arrayref consisting of the index of every hop taken to get to 
+Returns an ARRAY consisting of the index of every hop taken to get to 
 the node reference belonging to the specified node name starting from 
 the root of the tree or the specified parent node reference.
 
