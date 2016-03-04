@@ -1,6 +1,6 @@
 # Changes for IRC::Server::Tree
 
-0.060001 2016-03-04
+0.061001 2016-03-04
 
   - Add optional DFS resolver
 
