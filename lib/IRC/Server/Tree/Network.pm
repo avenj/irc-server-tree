@@ -3,7 +3,7 @@ package IRC::Server::Tree::Network;
 ## An IRC Network with route memoization and simple sanity checks
 ## IRC::Server::Tree lives in ->tree()
 
-use strictures 1;
+use strictures 2;
 
 use Carp;
 use Scalar::Util 'blessed';

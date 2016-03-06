@@ -2,7 +2,7 @@ package IRC::Server::Tree;
 
 ## Array-type object representing a network map.
 
-use strictures 1;
+use strictures 2;
 use Carp;
 
 use Scalar::Util 'blessed', 'reftype';
